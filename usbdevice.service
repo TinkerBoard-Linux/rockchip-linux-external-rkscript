@@ -5,9 +5,9 @@ After=local-fs.target
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
 ExecStart=/usr/bin/usbdevice start
 ExecStop=/usr/bin/usbdevice stop
+RemainAfterExit=yes
 
 [Install]
 WantedBy=sysinit.target
