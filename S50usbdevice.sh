@@ -10,6 +10,7 @@
 
 case "$1" in
 	start|stop|restart)
+		echo "starting usbdevice service, log saved to /var/log/usbdevice.log"
 		/sbin/start-stop-daemon -Sbx /usr/bin/usbdevice $1
 		;;
 	*)

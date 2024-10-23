@@ -7,7 +7,7 @@ ACTION=="remove", GOTO="persistent_storage_end"
 SUBSYSTEM!="block", GOTO="persistent_storage_end"
 
 # ignore removable devices
-ATTRS{removable}!="0", GOTO="persistent_storage_end"
+ATTRS{removable}=="1", GOTO="persistent_storage_end"
 
 # honor various types of names
 ENV{ID_PART_ENTRY_NAME}=="?*", \

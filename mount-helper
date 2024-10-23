@@ -65,11 +65,12 @@ mount_all()
 
 	# Ignore basic file systems
 	ID=0
-	grep -vwE "^#|${BASIC_FSTYPE// /|}" /etc/fstab | while read LINE;do
-	do_part $LINE&
-	ID=$(( $ID + 1 ))
-done
-wait
+	grep -vwE "^#|${BASIC_FSTYPE// /|}" /etc/fstab | \
+		while read LINE;do
+			do_part $LINE&
+			ID=$(( $ID + 1 ))
+		done
+	wait
 }
 
 case "$1" in
