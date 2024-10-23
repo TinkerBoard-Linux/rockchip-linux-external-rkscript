@@ -548,7 +548,7 @@ usb_prepare()
 	USB_FUNCS="$(echo "$USB_FUNCS" | tr ',' ' ')"
 
 	# Orders required by kernel
-	USB_FUNCS="$(usb_funcs_sort rndis uac uvc adb ntb ums mtp acm)"
+	USB_FUNCS="$(usb_funcs_sort rndis uac uvc ntb ums mtp acm adb)"
 	USB_CONFIG="$(echo "$USB_FUNCS" | tr ' ' '_')"
 
 	if [ ! -d $USB_GADGET_DIR ]; then
