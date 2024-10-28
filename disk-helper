@@ -67,8 +67,8 @@ normalize_device()
 	fi
 
 	# Check partition name
-	UEVENT=$(grep -l -m 1 "^PARTNAME=$DEV$" \
-		/sys/class/block/*/uevent 2>/dev/null || true)
+	UEVENT=$(grep -l "^PARTNAME=$DEV$" \
+		/sys/class/block/*/uevent 2>/dev/null | tail -n 1 || true)
 	if [ "$UEVENT" ]; then
 		echo "/dev/$(basename $(dirname $UEVENT))"
 		return
