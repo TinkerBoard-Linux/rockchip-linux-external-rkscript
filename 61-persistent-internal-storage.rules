@@ -16,7 +16,6 @@ ENV{PARTNAME}=="?*", SYMLINK+="block/by-name/$env{PARTNAME}", \
   GOTO="persistent_storage_end"
 ENV{ID_FS_LABEL}=="?*", SYMLINK+="block/by-name/$env{ID_FS_LABEL}", \
   GOTO="persistent_storage_end"
-KERNEL=="mtdblock*", TEST=="attr/name", SYMLINK+="block/by-name/$attr{name}"
-KERNEL=="mtdblock*", TEST=="attr/device/name", SYMLINK+="block/by-name/$attr{device/name}"
+KERNEL=="mtdblock*", TEST=="device/name", SYMLINK+="block/by-name/$attr{device/name}"
 
 LABEL="persistent_storage_end"
