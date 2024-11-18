@@ -119,7 +119,7 @@ process_dir() {
 	return 1
 }
 
-LOG_DIRS="$(echo "$LOG_DIRS" | xargs -d ',')"
+LOG_DIRS="$(echo "$LOG_DIRS" | tr ',' ' ')"
 for dir in $LOG_DIRS; do
 	if [ ! -d "$dir" ]; then
 		log "[WARN] Not a dir: \"$dir\""

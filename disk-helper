@@ -486,7 +486,7 @@ prepare_part()
 	MOUNT_OPTS=${OPTS:+" -o ${OPTS%,}"}
 
 	# Detect ro/rw
-	MOUNT_RO_RW=$(echo "$OPTS" | xargs -n 1 -d',' | \
+	MOUNT_RO_RW=$(echo "$OPTS" | tr ',' ' ' | xargs -n 1 | \
 		grep -o "^r[ow]$" || true)
 	if [ -z "$MOUNT_RO_RW" ]; then
 		if is_rootfs && is_ro; then
