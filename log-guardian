@@ -18,7 +18,10 @@ MIN_AVAIL_SIZE="100M"
 LOG_DIRS="/var/log/,/tmp/"
 
 log() {
-	logger -s -t log-guardian $@
+	if which logger >/dev/null; then
+		logger -t log-guardian $@
+	fi
+	echo "log-guardian: $@"
 }
 
 PID=$(cat $PID_FILE 2>/dev/null || true)

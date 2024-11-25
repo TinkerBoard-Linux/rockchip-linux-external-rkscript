@@ -86,8 +86,10 @@ fi
 # ---- helper functions
 usb_msg()
 {
-	logger -t "$(basename "$0")" "[$$]: $@"
-	echo "[$(date +"%F %T")] $@"
+	if which logger >/dev/null; then
+		logger -t "$(basename "$0")" "[$$]: $@"
+	fi
+	echo "[$(date +"%F %T")] $(basename "$0"): $@"
 }
 
 # Based on <<Rockchip_Developer_Guide_USB_CN>> V2.0.0

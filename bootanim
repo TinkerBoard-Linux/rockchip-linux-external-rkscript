@@ -17,7 +17,10 @@ TIMEOUT=${2:-${BOOTANIM_DEFAULT_TIMEOUT:-10}}
 
 log()
 {
-	logger -s -t bootanim $@
+	if which logger >/dev/null; then
+		logger -t bootanim $@
+	fi
+	echo "bootanim: $@"
 }
 
 pid_by_sid()
