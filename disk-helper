@@ -203,7 +203,7 @@ format_part()
 		ext2)
 			# Set max-mount-counts to 0, and disable the time-dependent checking.
 			check_tool mke2fs BR2_PACKAGE_E2FSPROGS && \
-			mke2fs -F -L $PART_NAME $DEV && \
+			mke2fs -F -b 4096 -L $PART_NAME $DEV && \
 			tune2fs -c 0 -i 0 $DEV
 			;;
 		vfat)
