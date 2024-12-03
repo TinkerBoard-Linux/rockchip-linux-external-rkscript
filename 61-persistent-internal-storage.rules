@@ -9,6 +9,9 @@ SUBSYSTEM!="block", GOTO="persistent_storage_end"
 # ignore removable devices
 ATTRS{removable}=="1", GOTO="persistent_storage_end"
 
+# ignore SD Cards
+ATTRS{TYPE}=="SD", GOTO="persistent_storage_end"
+
 # honor various types of names
 ENV{ID_PART_ENTRY_NAME}=="?*", \
   SYMLINK+="block/by-name/$env{ID_PART_ENTRY_NAME}", GOTO="persistent_storage_end"
