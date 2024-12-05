@@ -521,11 +521,14 @@ usb_funcs_grep()
 
 usb_funcs_sort()
 {
+	# Orders required by kernel
+	FUNCS="rndis uac uvc ntb ums mtp acm"
 	{
-		for func in $@; do
-			usb_funcs_grep -E $func
+		for func in $FUNCS; do
+			usb_funcs_grep $func
 		done
-		usb_funcs_grep -vE $(echo $@ | tr ' ' '|')
+		usb_funcs_grep -vE $(echo $FUNCS adb | tr ' ' '|')
+		usb_funcs_grep adb
 	} | uniq | xargs
 }
 
@@ -549,8 +552,7 @@ usb_prepare()
 	USB_FUNCS=${USB_FUNCS:-adb}
 	USB_FUNCS="$(echo "$USB_FUNCS" | tr ',' ' ')"
 
-	# Orders required by kernel
-	USB_FUNCS="$(usb_funcs_sort rndis uac uvc ntb ums mtp acm adb)"
+	USB_FUNCS="$(echo "$USB_FUNCS" | usb_funcs_sort)"
 	USB_CONFIG="$(echo "$USB_FUNCS" | tr ' ' '_')"
 
 	if [ ! -d $USB_GADGET_DIR ]; then
