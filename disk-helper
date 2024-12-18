@@ -430,8 +430,7 @@ prepare_part()
 			FSCK_CONFIG=BR2_PACKAGE_F2FS_TOOLS
 			FSRESIZE=resize_f2fs
 			;;
-		ubi|ubifs)
-			FSTYPE=ubifs
+		ubifs)
 			FSGROUP=ubifs
 			unset FSCK
 			unset FSRESIZE
@@ -459,7 +458,7 @@ prepare_part()
 			;;
 		*)
 			message "Unsupported file system $FSTYPE for $DEV"
-			return
+			return 1
 	esac
 
 	# Setup mount tool and opts
@@ -496,14 +495,16 @@ prepare_part()
 		fi
 	fi
 
-	# Prepare for ubi (consider /dev/mtdX as ubiblock)
-	if [ "$FSGROUP" = ubifs ] || echo $DEV | grep -q "/dev/mtd[0-9]";then
+	# Prepare for ubi
+	if [ "$FSTYPE" = ubifs ] ||
+		[ "$(dd if=$DEV bs=1 count=3 status=none)" = UBI ]; then
 		if ! prepare_ubi; then
 			message "Failed to prepare ubi for $DEV"
-			[ "$AUTO_MKFS" ] || return
 
-			message "Auto formatting"
-			format_ubifs || return
+			if [ "$AUTO_MKFS" ] && [ "$FSGROUP" = ubifs ]; then
+				message "Auto formatting"
+				format_ubifs || true
+			fi
 		fi
 	fi
 }
