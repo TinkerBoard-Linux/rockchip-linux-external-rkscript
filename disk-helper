@@ -62,6 +62,9 @@ normalize_device()
 	if find /dev/block/by-name/$DEV 2>/dev/null; then
 		return
 	fi
+	if find /dev/disk/*/$DEV 2>/dev/null; then
+		return
+	fi
 
 	# Check partition name
 	UEVENT=$(grep -l -m 1 "^PARTNAME=$DEV$" \
@@ -217,6 +220,14 @@ format_part()
 			check_tool mkntfs BR2_PACKAGE_NTFS_3G_NTFSPROGS && \
 			mkntfs -FCQ -L $PART_NAME $DEV
 			;;
+		btrfs)
+			check_tool mkfs.btrfs BR2_PACKAGE_BTRFS_PROGS && \
+			mkfs.btrfs -f -L $PART_NAME $DEV
+			;;
+		f2fs)
+			check_tool mkfs.f2fs BR2_PACKAGE_F2FS_TOOLS && \
+			mkfs.f2fs -f -l $PART_NAME $DEV
+			;;
 		ubifs)
 			format_ubifs
 			;;
@@ -224,10 +235,8 @@ format_part()
 			check_tool mkfs.jffs2 BR2_PACKAGE_MTD_MKFSJFFS2 && \
 			mkfs.jffs2 -o $DEV 0x10000 --pad=0x400000 -s 0x1000 -n
 			;;
-		squashfs)
-			# check_tool mksquashfs BR2_PACKAGE_SQUASHFS && \
-			# mksquashfs $DEV
-			message "It's pointness to format a squashfs partition..."
+		erofs|squashfs)
+			message "It's pointness to format a read-only partition..."
 			false
 			;;
 		auto)
@@ -297,6 +306,20 @@ resize_ntfs()
 	echo y | ntfsresize -f $DEV
 }
 
+resize_btrfs()
+{
+	check_tool btrfs BR2_PACKAGE_BTRFS_PROGS || return 1
+
+	btrfs filesystem resize max $DEV
+}
+
+resize_f2fs()
+{
+	check_tool resize.f2fs BR2_PACKAGE_F2FS_TOOLS || return 1
+
+	resize.f2fs $DEV
+}
+
 resize_part()
 {
 	# Already resized
@@ -353,7 +376,7 @@ prepare_part()
 		/mnt/* | /media/*) return 1 ;;
 	esac
 
-	DEV="$(realpath "$(normalize_device)" 2>/dev/null)"
+	DEV="$(realpath "$(normalize_device | head -n 1)" 2>/dev/null)"
 	[ "$DEV" ] || return 1
 
 	# Only accept block or char device
@@ -395,6 +418,18 @@ prepare_part()
 			FSCK_CONFIG=BR2_PACKAGE_NTFS_3G_NTFSPROGS
 			FSRESIZE=resize_ntfs
 			;;
+		btrfs)
+			FSGROUP=btrfs
+			FSCK="btrfs check --repair"
+			FSCK_CONFIG=BR2_PACKAGE_BTRFS_PROGS
+			FSRESIZE=resize_btrfs
+			;;
+		f2fs)
+			FSGROUP=f2fs
+			FSCK="fsck.f2fs -y"
+			FSCK_CONFIG=BR2_PACKAGE_F2FS_TOOLS
+			FSRESIZE=resize_f2fs
+			;;
 		ubi|ubifs)
 			FSTYPE=ubifs
 			FSGROUP=ubifs
@@ -403,6 +438,11 @@ prepare_part()
 			;;
 		squashfs)
 			FSGROUP=squashfs
+			unset FSCK
+			unset FSRESIZE
+			;;
+		erofs)
+			FSGROUP=erofs
 			unset FSCK
 			unset FSRESIZE
 			;;
