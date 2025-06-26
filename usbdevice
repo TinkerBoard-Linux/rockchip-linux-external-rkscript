@@ -69,7 +69,7 @@ usb_get_started()
 }
 
 CONFIGFS_DIR=/sys/kernel/config
-USB_GROUP=rockchip
+USB_GROUP=asus
 USB_STRINGS_ATTR=strings/0x409
 USB_GADGET_DIR=$CONFIGFS_DIR/usb_gadget/$USB_GROUP
 USB_GADGET_STRINGS_DIR=$USB_GADGET_DIR/$USB_STRINGS_ATTR
@@ -92,25 +92,38 @@ usb_msg()
 	echo "[$(date +"%F %T")] $(basename "$0"): $@"
 }
 
+usb_vid()
+{
+	case "$(echo $USB_FUNCS | xargs -n 1 | sort | xargs | tr ' ' '-')" in
+		ums)		echo 0x0b05;;
+		mtp)		echo 0x0b05;;
+		adb)		echo 0x0b05;;
+		adb_mtp)	echo 0x0b05;;
+		rndis)		echo 0x0b05;;
+		adb_rndis)	echo 0x0b05;;
+		*)		echo 0x2207;;
+	esac
+}
+
 # Based on <<Rockchip_Developer_Guide_USB_CN>> V2.0.0
 usb_pid()
 {
 	case "$(echo $USB_FUNCS | xargs -n 1 | sort | xargs | tr ' ' '-')" in
-		ums)			echo 0x0000;;
-		mtp)			echo 0x0001;; # For Android
+		ums)			echo 0x7820;;
+		mtp)			echo 0x7772;; # For Android
 		ptp)			echo 0x0002;; # For Android
-		rndis)			echo 0x0003;;
+		rndis)			echo 0x7774;;
 		midi)			echo 0x0004;; # For Android
 		uvc)			echo 0x0005;; # For Android
-		adb)			echo 0x0006;; # Single ADB
+		adb)			echo 0x7770;; # Single ADB
 		# mtp)			echo 0x0007;; # For Android
 		# ptp)			echo 0x0008;; # For Android
 		ntb)			echo 0x0009;; # For next Computing-Stick
 		# ums)			echo 0x0010;; # For U-Boot
 		# adb-ums)		echo 0x0010;; # Out-dated
-		adb-mtp)		echo 0x0011;;
+		adb-mtp)		echo 0x7773;;
 		# adb-ptp)		echo 0x0012;; # For Android
-		adb-rndis)		echo 0x0013;; # For Android
+		adb-rndis)		echo 0x7775;; # For Android
 		adb-midi)		echo 0x0014;; # For Android
 		adb-uvc)		echo 0x0015;; # For Android
 		adb-uac[12]-uvc|adb-uvc-rndis)	echo 0x0016;;
@@ -501,8 +514,9 @@ usb_init()
 	mkdir -p $USB_GADGET_STRINGS_DIR
 	SERIAL=$(grep Serial /proc/cpuinfo | cut -d':' -f2)
 	echo ${SERIAL:-0123456789ABCDEF} > $USB_GADGET_STRINGS_DIR/serialnumber
-	echo ${USB_MANUFACTUER:-Rockchip}  > $USB_GADGET_STRINGS_DIR/manufacturer
-	echo ${USB_PRODUCT:-rk3xxx}  > $USB_GADGET_STRINGS_DIR/product
+	echo $USB_GROUP  > $USB_GADGET_STRINGS_DIR/manufacturer
+	USB_PRODUCT=$(cat /proc/boardinfo)
+	echo ${USB_PRODUCT:-Tinker Board}  > $USB_GADGET_STRINGS_DIR/product
 
 	mkdir -p $USB_CONFIGS_DIR
 	echo 500 > $USB_CONFIGS_DIR/MaxPower
@@ -586,8 +600,10 @@ usb_prepare()
 		usb_stop
 	fi
 
+	# Update USB VID
+	printf "0x%x" $(usb_vid) > $USB_GADGET_DIR/idVendor
 	# Update USB PID
-	printf "0x%x" ${USB_PRODUCT_ID:-$(usb_pid)} > $USB_GADGET_DIR/idProduct
+	printf "0x%x" $(usb_pid) > $USB_GADGET_DIR/idProduct
 }
 
 usb_start()
